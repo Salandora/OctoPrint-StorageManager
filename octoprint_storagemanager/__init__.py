@@ -33,14 +33,18 @@ class StorageManagerPlugin(octoprint.plugin.TemplatePlugin,
 			dict(type="sidebar", get_template_configs="storagemanager_sidebar.jinja2", data_bind="visible: loginState.isUser")
 		]
 
+	def routes_hook(self, current_routes):
+		mypath = self._settings.get(["storage_path"])
+		if mypath is None:
+			return []
+
+		return [
+			(r"/downloads/storagemanager/([^/]*)", octoprint.server.util.tornado.LargeResponseHandler, dict(path=mypath, as_attachment=True))
+		]
+
 	##~~ BlueprintPlugin API
 
-	def is_blueprint_protected(self):
-		return False
-
 	@octoprint.plugin.BlueprintPlugin.route("/upload", methods=["POST"])
-	@restricted_access
-	@admin_permission.require(403)
 	def uploadFile(self):
 		input_name = "file"
 		input_upload_name = input_name + "." + self._settings.global_get(["server", "uploads", "nameSuffix"])
@@ -69,8 +73,6 @@ class StorageManagerPlugin(octoprint.plugin.TemplatePlugin,
 		return NO_CONTENT
 
 	@octoprint.plugin.BlueprintPlugin.route("/files", methods=["GET"])
-	@restricted_access
-	@user_permission.require(403)
 	def listFiles(self):
 		path = self._settings.get(["storage_path"])
 		if path is None:
@@ -80,8 +82,6 @@ class StorageManagerPlugin(octoprint.plugin.TemplatePlugin,
 		return jsonify(files=files)
 
 	@octoprint.plugin.BlueprintPlugin.route("/files/<path:filename>", methods=["DELETE"])
-	@restricted_access
-	@admin_permission.require(403)
 	def deleteFiles(self, filename):
 		path = self._settings.get(["storage_path"])
 		if path is None:
@@ -93,20 +93,6 @@ class StorageManagerPlugin(octoprint.plugin.TemplatePlugin,
 
 		os.remove(secure)
 		return NO_CONTENT
-
-	@octoprint.plugin.BlueprintPlugin.route("/download/<path:filename>")
-	@restricted_access
-	@user_permission.require(403)
-	def download(self, filename):
-		path = self._settings.get(["storage_path"])
-		if path is None:
-			return jsonify(files=dict())
-
-		secure = os.path.join(path, secure_filename(filename))
-		if not os.path.exists(secure):
-			return make_response("File not found: %s" % filename, 404)
-
-		return send_from_directory(path, secure_filename(filename), as_attachment=True)
 
 	def _list_folder(self, path, recursive=True):
 		result = []
@@ -123,7 +109,7 @@ class StorageManagerPlugin(octoprint.plugin.TemplatePlugin,
 					name=entry,
 					type="file",
 					refs=dict(
-						download=url_for("plugin.storagemanager.download", filename=entry)
+						download=url_for("index", _external=True) + "downloads/storagemanager/" + entry
 					)
 				))
 
@@ -144,5 +130,5 @@ def __plugin_load__():
 	global __plugin_implementation__
 	__plugin_implementation__ = StorageManagerPlugin()
 
-	# global __plugin_hooks__
-	# __plugin_hooks__ = {"some.octoprint.hook": __plugin_implementation__.some_hook_handler}
+	global __plugin_hooks__
+	__plugin_hooks__ = {"octoprint.server.http.routes": __plugin_implementation__.routes_hook}
