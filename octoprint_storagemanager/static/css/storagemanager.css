@@ -1,0 +1,18 @@
+﻿#sidebar_plugin_storagemanager .storagemanager_files {
+    padding-right: 7px;
+}
+
+#sidebar_plugin_storagemanager .entry
+{
+    padding: 5px;
+    line-height: 20px;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+}
+
+#sidebar_plugin_storagemanager .action-buttons
+{
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+}

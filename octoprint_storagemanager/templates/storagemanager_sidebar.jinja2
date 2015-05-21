@@ -1,0 +1,15 @@
+Files for you to use
+<form class="form-search">
+  <input type="text" class="input-block search-query" data-bind="value: searchQuery, valueUpdate: 'input'" placeholder="{{ _('Search...') }}">
+</form>
+<div class="storagemanager_files" data-bind="slimScrolledForeach: listHelper2.paginatedItems">
+  <div class="entry" data-bind="template: { name: 'storagemanager_files_template', data: $data }"></div>
+</div>
+<script type="text/html" id="storagemanager_files_template">
+	<div class="title" data-bind=" text: name"></div>
+	<div class="btn-group action-buttons">
+		<a class="btn btn-mini" data-bind="attr: {href: refs.download}">
+		<i class="icon-download-alt" title="{{ _('Download') }}"></i>
+		</a>
+	</div>
+</script>

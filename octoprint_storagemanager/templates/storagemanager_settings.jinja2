@@ -1,0 +1,37 @@
+<h4> Data Storage Manager </h4>
+
+<div class="span10">
+<div class="control-group">
+    <label class="control-label" for="settings-storage-path">{{ _('Path to Storage') }}</label>
+    <div class="controls">
+        <input type="text" class="input-block-level" data-bind="value: settings.plugins.storagemanager.storage_path">
+    </div>
+</div>
+<div class="control-group">
+	<label class="control-label">{{ _('File') }}</label>
+	<div class="input-prepend">
+		<span class="btn fileinput-button">
+		    <span>{{ _('Browse...') }}</span>
+		    <input id="settings-upload" type="file" name="file" data-url="{{ url_for("plugin.storagemanager.uploadFile") }}">
+		</span>
+	    <span class="add-on" data-bind="text: file_path" style="max-width: 65%; text-overflow: ellipsis; overflow: hidden;"></span>
+	</div>
+</div>
+<button class="btn btn-block btn-primary" id="settings-upload-start" data-bind="enable: loginState.isUser()">{{ _('Upload') }}</button>
+</div>
+<table class="table table-striped table-hover table-condensed table-hover" id="settings-files" data-url="{{ url_for("plugin.storagemanager.listFiles") }}">
+    <thead>
+    <tr>
+        <th class="settings_name">{{ _('Name') }}</th>
+        <th class="settings_action">{{ _('Action') }}</th>
+    </tr>
+    </thead>
+    <tbody data-bind="foreach: listHelper1.paginatedItems">
+    <tr data-bind="attr: {title: name}">
+        <td class="settings_name" data-bind="text: name"></td>
+        <td class="settings_action">
+            <a href="#" class="icon-trash" data-bind="click: function() { if ($root.loginState.isUser()) { $parent.removeFile($data.name); } else { return; } }, css: {disabled: !$root.loginState.isUser()}"></a>&nbsp;|&nbsp;<a href="#" class="icon-download" data-bind="attr: {href: refs.download}"></a>
+        </td>
+    </tr>
+    </tbody>
+</table>
